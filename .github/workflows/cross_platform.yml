@@ -1,0 +1,53 @@
+name: Cross-platform Compatibility Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    name: Test on ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          # Step 1: Upgrade pip and install core build tools
+          python -m pip install --upgrade pip setuptools wheel
+          
+          # Step 2: Install torch first
+          pip install torch==2.2.2
+          
+          # Step 3: Install PyG packages with platform-specific logic
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            # For macOS, compile from source with specific flags
+            echo "Applying macOS build flags..."
+            MACOSX_DEPLOYMENT_TARGET=10.15 pip install --no-build-isolation torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+          else
+            # For Linux/Windows, install from pre-built wheels
+            pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.2+cpu.html
+          fi
+          
+          # Step 4: Install the rest of the requirements
+          # Filter out all packages installed in previous steps, INCLUDING pip
+          grep -vE "torch-scatter|torch-sparse|torch-cluster|torch-spline-conv|torch|triton|pip" requirements.txt > other_requirements.txt
+          pip install -r other_requirements.txt
+
+      - name: Run Python script
+        run: python ./run_sim.py --config_path=ini/example_ini/cross_platform.ini

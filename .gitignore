@@ -1,0 +1,46 @@
+# Pycharm
+.idea/
+
+# sphinx
+docs/_build/*
+
+# My stuff
+misc/
+
+# Data files
+data/output/*
+data/input/*
+
+ai_scripts/models/*
+
+data/ai
+data/input
+data/output
+data/plots
+data/excel
+
+logs/*
+
+ini/run_ini/*
+bash_scripts/slurm/*
+
+.vscode/
+.venv/
+
+# Virtual environments
+venvs/unity_venv/venv
+
+# vscode-generated cache files
+__pycache__/
+
+data/json_input/run_mods/*
+
+unity/experiments
+unity/cluster_results
+unity/specs
+unity/configs
+unity/.tmp_config
+
+reinforcement_learning/plotting/figures
+reinforcement_learning/experiments/
+sb3_scripts/yml
